@@ -18,6 +18,8 @@ configurations {
 version = "${mc_version}-${mod_version}"
 group = mod_group_id
 
+def mixinRefMapFile = layout.buildDirectory.file("tmp/compileJava/${mod_id}.refmap.json")
+
 base {
     archivesName = mod_id
 }
@@ -126,6 +128,10 @@ tasks.named('processResources', ProcessResources).configure {
 }
 
 tasks.named('jar', Jar).configure {
+    from(mixinRefMapFile) {
+        into ''
+    }
+
     manifest {
         attributes([
                 'Specification-Title'     : mod_id,
@@ -157,4 +163,9 @@ publishing {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+    options.compilerArgs += [
+            "-AoutRefMapFile=${mixinRefMapFile.get().asFile.absolutePath}",
+            "-AdefaultObfuscationEnv=searge",
+            "-AreobfSrgFile=${layout.buildDirectory.file('createMcpToSrg/output.srg').get().asFile.absolutePath}"
+    ]
 }

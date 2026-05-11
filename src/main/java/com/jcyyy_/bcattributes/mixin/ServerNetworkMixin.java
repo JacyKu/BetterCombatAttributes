@@ -35,9 +35,10 @@ public abstract class ServerNetworkMixin {
                     value = "INVOKE",
                     target = "Lnet/minecraft/server/level/ServerPlayer;attack(Lnet/minecraft/world/entity/Entity;)V",
                     remap = false
-            )
+            ),
+            require = 0
     )
-    private static void bcattributes$applySweepRangeDamageFalloff(
+    private static void bcattributes$applySweepRangeDamageFalloffNamed(
             final ServerPlayer attackingPlayer,
             final Entity target,
             final ServerPlayer sourcePlayer,
@@ -48,6 +49,40 @@ public abstract class ServerNetworkMixin {
             final ServerLevel level,
             final boolean useVanillaPacket,
             final ServerGamePacketListenerImpl packetListener
+    ) {
+        bcattributes$applySweepRangeDamageFalloff(attackingPlayer, target, weaponAttributes);
+    }
+
+    @Redirect(
+            method = "lambda$initializeHandlers$5",
+            remap = false,
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/server/level/ServerPlayer;m_5706_(Lnet/minecraft/world/entity/Entity;)V",
+                    remap = false
+            ),
+            require = 0
+    )
+    private static void bcattributes$applySweepRangeDamageFalloffSrg(
+            final ServerPlayer attackingPlayer,
+            final Entity target,
+            final ServerPlayer sourcePlayer,
+            final Packets.C2S_AttackRequest attackRequest,
+            final WeaponAttributes weaponAttributes,
+            final WeaponAttributes.Attack attack,
+            final AttackHand hand,
+            final ServerLevel level,
+            final boolean useVanillaPacket,
+            final ServerGamePacketListenerImpl packetListener
+    ) {
+        bcattributes$applySweepRangeDamageFalloff(attackingPlayer, target, weaponAttributes);
+    }
+
+    @Unique
+    private static void bcattributes$applySweepRangeDamageFalloff(
+            final ServerPlayer attackingPlayer,
+            final Entity target,
+            final WeaponAttributes weaponAttributes
     ) {
         double attackRange = weaponAttributes != null ? weaponAttributes.attackRange() : 0.0D;
         double damageMultiplier = BcAttributes.getSweepDamageMultiplier(attackingPlayer, target, attackRange);
