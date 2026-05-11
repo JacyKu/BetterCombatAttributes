@@ -1,0 +1,5 @@
+{
+  "attribute.name.bcattributes.max_sweep_targets": "Max Sweep Targets",
+  "attribute.name.bcattributes.sweep_range_damage_falloff": "Sweep Range Damage Falloff",
+  "attribute.name.bcattributes.sweep_angle": "Sweep Angle"
+}
