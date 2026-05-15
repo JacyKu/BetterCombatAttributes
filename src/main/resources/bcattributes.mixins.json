@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "bcattributes.refmap.json",
   "mixins": [
+    "PlayerAttackHelperMixin",
     "ServerNetworkMixin"
   ],
   "client": [

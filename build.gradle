@@ -94,6 +94,9 @@ dependencies {
     def clothConfigDependency = 'maven.modrinth:cloth-config:11.1.136+forge'
     def playerAnimatorDependency = 'maven.modrinth:playeranimator:1.0.2-rc1+1.20-forge'
     def nbtAutocomplete = 'curse.maven:nbt-autocomplete-813557:5957924'
+    def tslatEntityStatus = 'curse.maven:tslatentitystatus-tes-830420:7126708'
+    def targetDummy = 'curse.maven:mmmmmmmmmmmm-225738:6860192'
+    def moonlight = 'curse.maven:selene-499980:8044110'
 
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
     compileOnly fg.deobf(betterCombatDependency)
@@ -101,6 +104,9 @@ dependencies {
     localRuntime fg.deobf(clothConfigDependency)
     localRuntime fg.deobf(playerAnimatorDependency)
     localRuntime fg.deobf(nbtAutocomplete)
+    localRuntime fg.deobf(tslatEntityStatus)
+    localRuntime fg.deobf(targetDummy)
+    localRuntime fg.deobf(moonlight)
     compileOnly 'org.spongepowered:mixin:0.8.5'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }

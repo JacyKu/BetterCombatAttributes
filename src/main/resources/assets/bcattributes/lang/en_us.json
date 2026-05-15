@@ -1,4 +1,14 @@
 {
+  "attribute.name.bcattributes.upswing_multiplier": "Upswing Multiplier",
+  "attribute.name.bcattributes.movement_speed_while_attacking": "Movement Speed While Attacking",
+  "attribute.name.bcattributes.target_search_range_multiplier": "Target Search Range Multiplier",
+  "attribute.name.bcattributes.dual_wielding_main_hand_damage_multiplier": "Dual Wielding Main Hand Damage Multiplier",
+  "attribute.name.bcattributes.dual_wielding_off_hand_damage_multiplier": "Dual Wielding Off Hand Damage Multiplier",
+  "attribute.name.bcattributes.dual_wielding_attack_speed_multiplier": "Dual Wielding Attack Speed Multiplier",
+  "attribute.name.bcattributes.attack_interval_cap": "Attack Interval Cap",
+  "attribute.name.bcattributes.reworked_sweeping_extra_target_count": "Reworked Sweeping Extra Target Count",
+  "attribute.name.bcattributes.reworked_sweeping_maximum_damage_penalty": "Reworked Sweeping Maximum Damage Penalty",
+  "attribute.name.bcattributes.reworked_sweeping_enchant_restores": "Reworked Sweeping Enchant Restores",
   "attribute.name.bcattributes.max_sweep_targets": "Max Sweep Targets",
   "attribute.name.bcattributes.sweep_range_damage_falloff": "Sweep Range Damage Falloff",
   "attribute.name.bcattributes.sweep_angle": "Sweep Angle"

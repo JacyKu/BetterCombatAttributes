@@ -2,6 +2,7 @@ package com.jcyyy_.bcattributes.mixin;
 
 import java.util.List;
 
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -12,11 +13,31 @@ import com.jcyyy_.bcattributes.BcAttributes;
 
 import net.bettercombat.api.WeaponAttributes;
 import net.bettercombat.client.collision.TargetFinder;
+import net.bettercombat.config.ServerConfig;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
 @Mixin(value = TargetFinder.class, remap = false)
 public abstract class TargetFinderMixin {
+    @Redirect(
+            method = "getInitialTargets",
+            remap = false,
+            at = @At(
+                    value = "FIELD",
+                    target = "Lnet/bettercombat/config/ServerConfig;target_search_range_multiplier:F",
+                    opcode = Opcodes.GETFIELD,
+                    remap = false
+            )
+    )
+    private static float bcattributes$overrideTargetSearchRangeMultiplier(
+            final ServerConfig config,
+            final Player player,
+            final Entity cursorTarget,
+            final double attackRange
+    ) {
+        return BcAttributes.getTargetSearchRangeMultiplier(player);
+    }
+
     @Redirect(
             method = "findAttackTargetResult",
             remap = false,
@@ -84,6 +105,6 @@ public abstract class TargetFinderMixin {
             final CallbackInfoReturnable<TargetFinder.TargetResult> cir
     ) {
         TargetFinder.TargetResult targetResult = cir.getReturnValue();
-                targetResult.entities = BcAttributes.limitSweepTargets(player, cursorTarget, targetResult.entities, attack.angle());
+        targetResult.entities = BcAttributes.limitSweepTargets(player, cursorTarget, targetResult.entities, attack.angle());
     }
 }
