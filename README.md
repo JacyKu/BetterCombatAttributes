@@ -45,9 +45,3 @@ All `bcattributes:*` entries below are registered by this mod on players. `forge
 /attribute @s bcattributes:sweep_angle base set 70
 /attribute @s forge:entity_reach base set 6
 ```
-
-## Notes
-
-- `bcattributes:sweep_angle` is additive to the weapon's default Better Combat angle.
-- If the effective sweep angle is reduced to `0` or below, extra sweep targets are suppressed.
-- `bcattributes:sweep_range_damage_falloff` uses a `0.0` to `1.0` range.
