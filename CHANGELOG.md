@@ -2,7 +2,7 @@
 ## 0.1.0 Beta NeoForge
 
 ### Added
-- NeoForge support for Minecraft 1.21.1 with Better Combat 2.4.
+- NeoForge support for Minecraft 1.21 with Better Combat 2.4.
 - `bcattributes:two_handed_damage_multiplier` to control damage dealt while wielding a two-handed weapon.
 ### Changed
 - Config-backed attributes now initialize their base values from Better Combat's server config on join and respawn, instead of overriding it with a hardcoded copy.

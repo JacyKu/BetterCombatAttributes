@@ -1,6 +1,6 @@
 # Better Combat Attributes
 
-NeoForge mod for Minecraft 1.21.1 that adds attribute-driven tweaks for Better Combat.
+NeoForge mod for Minecraft 1.21 (NeoForge 21.0.x) that adds attribute-driven tweaks for Better Combat.
 
 ## Features
 
