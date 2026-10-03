@@ -52,7 +52,7 @@ public abstract class TargetFinderMixin {
             final Entity cursorTarget,
             final double attackRange
     ) {
-        double modifiedAttackRange = BcAttributes.applyForgeReachToAttackRange(player, attackRange);
+        double modifiedAttackRange = BcAttributes.applyEntityReachToAttackRange(player, attackRange);
         return TargetFinder.getInitialTargets(player, cursorTarget, modifiedAttackRange);
     }
 

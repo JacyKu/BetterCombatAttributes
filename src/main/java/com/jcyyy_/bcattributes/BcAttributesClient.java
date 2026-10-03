@@ -1,23 +1,19 @@
 package com.jcyyy_.bcattributes;
 
-import net.bettercombat.BetterCombat;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
+import net.bettercombat.BetterCombatMod;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 
 public final class BcAttributesClient {
     private BcAttributesClient() {
     }
 
     public static void initialize() {
-        MinecraftForge.EVENT_BUS.addListener(BcAttributesClient::onClientTick);
+        NeoForge.EVENT_BUS.addListener(BcAttributesClient::onClientTick);
     }
 
-    private static void onClientTick(final TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) {
-            return;
-        }
-
-        if (BetterCombat.config == null || event.side.isServer()) {
+    private static void onClientTick(final ClientTickEvent.Post event) {
+        if (BetterCombatMod.config == null) {
             return;
         }
 
@@ -26,7 +22,7 @@ public final class BcAttributesClient {
             return;
         }
 
-        BetterCombat.config.upswing_multiplier = BcAttributes.getUpswingMultiplier(minecraft.player);
-        BetterCombat.config.movement_speed_while_attacking = BcAttributes.getMovementSpeedWhileAttacking(minecraft.player);
+        BetterCombatMod.config.upswing_multiplier = BcAttributes.getUpswingMultiplier(minecraft.player);
+        BetterCombatMod.config.movement_speed_while_attacking = BcAttributes.getMovementSpeedWhileAttacking(minecraft.player);
     }
 }

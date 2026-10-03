@@ -2,8 +2,7 @@
   "required": true,
   "minVersion": "0.8",
   "package": "com.jcyyy_.bcattributes.mixin",
-  "compatibilityLevel": "JAVA_17",
-  "refmap": "bcattributes.refmap.json",
+  "compatibilityLevel": "JAVA_21",
   "mixins": [
     "PlayerAttackHelperMixin",
     "ServerNetworkMixin"

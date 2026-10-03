@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import net.bettercombat.BetterCombat;
+import net.bettercombat.BetterCombatMod;
 import net.bettercombat.api.client.AttackRangeExtensions;
 import net.bettercombat.config.ServerConfig;
 import net.bettercombat.network.Packets;
@@ -12,27 +12,25 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.EntityAttributeModificationEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 @Mod(BcAttributes.MOD_ID)
 public final class BcAttributes {
     public static final String MOD_ID = "bcattributes";
-    private static final double VANILLA_BASE_ENTITY_REACH = 3.0D;
+    private static final double VANILLA_BASE_ENTITY_INTERACTION_RANGE = 3.0D;
     private static final double MIN_EFFECTIVE_SWEEP_ANGLE = 0.0001D;
     private static final double DEFAULT_UPSWING_MULTIPLIER = 0.5D;
     private static final double DEFAULT_MOVEMENT_SPEED_WHILE_ATTACKING = 0.5D;
@@ -46,70 +44,69 @@ public final class BcAttributes {
     private static final double DEFAULT_REWORKED_SWEEPING_MAXIMUM_DAMAGE_PENALTY = 0.5D;
     private static final double DEFAULT_REWORKED_SWEEPING_ENCHANT_RESTORES = 0.5D;
 
-    public static final DeferredRegister<Attribute> ATTRIBUTES = DeferredRegister.create(ForgeRegistries.ATTRIBUTES, MOD_ID);
-    public static final RegistryObject<Attribute> UPSWING_MULTIPLIER = ATTRIBUTES.register(
+    public static final DeferredRegister<Attribute> ATTRIBUTES = DeferredRegister.create(net.minecraft.core.registries.Registries.ATTRIBUTE, MOD_ID);
+    public static final DeferredHolder<Attribute, Attribute> UPSWING_MULTIPLIER = ATTRIBUTES.register(
         "upswing_multiplier",
         () -> new RangedAttribute("attribute.name.bcattributes.upswing_multiplier", DEFAULT_UPSWING_MULTIPLIER, 0.2D, 1.0D).setSyncable(true)
     );
-    public static final RegistryObject<Attribute> MOVEMENT_SPEED_WHILE_ATTACKING = ATTRIBUTES.register(
+    public static final DeferredHolder<Attribute, Attribute> MOVEMENT_SPEED_WHILE_ATTACKING = ATTRIBUTES.register(
         "movement_speed_while_attacking",
         () -> new RangedAttribute("attribute.name.bcattributes.movement_speed_while_attacking", DEFAULT_MOVEMENT_SPEED_WHILE_ATTACKING, 0.0D, 1.0D).setSyncable(true)
     );
-    public static final RegistryObject<Attribute> TARGET_SEARCH_RANGE_MULTIPLIER = ATTRIBUTES.register(
+    public static final DeferredHolder<Attribute, Attribute> TARGET_SEARCH_RANGE_MULTIPLIER = ATTRIBUTES.register(
         "target_search_range_multiplier",
         () -> new RangedAttribute("attribute.name.bcattributes.target_search_range_multiplier", DEFAULT_TARGET_SEARCH_RANGE_MULTIPLIER, 0.0D, 1024.0D).setSyncable(true)
     );
-    public static final RegistryObject<Attribute> DUAL_WIELDING_MAIN_HAND_DAMAGE_MULTIPLIER = ATTRIBUTES.register(
+    public static final DeferredHolder<Attribute, Attribute> DUAL_WIELDING_MAIN_HAND_DAMAGE_MULTIPLIER = ATTRIBUTES.register(
         "dual_wielding_main_hand_damage_multiplier",
         () -> new RangedAttribute("attribute.name.bcattributes.dual_wielding_main_hand_damage_multiplier", DEFAULT_DUAL_WIELDING_MAIN_HAND_DAMAGE_MULTIPLIER, 0.0D, 1024.0D).setSyncable(true)
     );
-    public static final RegistryObject<Attribute> DUAL_WIELDING_OFF_HAND_DAMAGE_MULTIPLIER = ATTRIBUTES.register(
+    public static final DeferredHolder<Attribute, Attribute> DUAL_WIELDING_OFF_HAND_DAMAGE_MULTIPLIER = ATTRIBUTES.register(
         "dual_wielding_off_hand_damage_multiplier",
         () -> new RangedAttribute("attribute.name.bcattributes.dual_wielding_off_hand_damage_multiplier", DEFAULT_DUAL_WIELDING_OFF_HAND_DAMAGE_MULTIPLIER, 0.0D, 1024.0D).setSyncable(true)
     );
-    public static final RegistryObject<Attribute> DUAL_WIELDING_ATTACK_SPEED_MULTIPLIER = ATTRIBUTES.register(
+    public static final DeferredHolder<Attribute, Attribute> DUAL_WIELDING_ATTACK_SPEED_MULTIPLIER = ATTRIBUTES.register(
         "dual_wielding_attack_speed_multiplier",
         () -> new RangedAttribute("attribute.name.bcattributes.dual_wielding_attack_speed_multiplier", DEFAULT_DUAL_WIELDING_ATTACK_SPEED_MULTIPLIER, 0.0D, 1024.0D).setSyncable(true)
     );
-    public static final RegistryObject<Attribute> TWO_HANDED_DAMAGE_MULTIPLIER = ATTRIBUTES.register(
+    public static final DeferredHolder<Attribute, Attribute> TWO_HANDED_DAMAGE_MULTIPLIER = ATTRIBUTES.register(
         "two_handed_damage_multiplier",
         () -> new RangedAttribute("attribute.name.bcattributes.two_handed_damage_multiplier", DEFAULT_TWO_HANDED_DAMAGE_MULTIPLIER, 0.0D, 1024.0D).setSyncable(true)
     );
-    public static final RegistryObject<Attribute> ATTACK_INTERVAL_CAP = ATTRIBUTES.register(
+    public static final DeferredHolder<Attribute, Attribute> ATTACK_INTERVAL_CAP = ATTRIBUTES.register(
         "attack_interval_cap",
         () -> new RangedAttribute("attribute.name.bcattributes.attack_interval_cap", DEFAULT_ATTACK_INTERVAL_CAP, 0.0D, 1024.0D).setSyncable(true)
     );
-    public static final RegistryObject<Attribute> REWORKED_SWEEPING_EXTRA_TARGET_COUNT = ATTRIBUTES.register(
+    public static final DeferredHolder<Attribute, Attribute> REWORKED_SWEEPING_EXTRA_TARGET_COUNT = ATTRIBUTES.register(
             "reworked_sweeping_extra_target_count",
             () -> new RangedAttribute("attribute.name.bcattributes.reworked_sweeping_extra_target_count", DEFAULT_REWORKED_SWEEPING_EXTRA_TARGET_COUNT, 1.0D, 1024.0D).setSyncable(true)
     );
-    public static final RegistryObject<Attribute> REWORKED_SWEEPING_MAXIMUM_DAMAGE_PENALTY = ATTRIBUTES.register(
+    public static final DeferredHolder<Attribute, Attribute> REWORKED_SWEEPING_MAXIMUM_DAMAGE_PENALTY = ATTRIBUTES.register(
             "reworked_sweeping_maximum_damage_penalty",
             () -> new RangedAttribute("attribute.name.bcattributes.reworked_sweeping_maximum_damage_penalty", DEFAULT_REWORKED_SWEEPING_MAXIMUM_DAMAGE_PENALTY, 0.0D, 1.0D).setSyncable(true)
     );
-    public static final RegistryObject<Attribute> REWORKED_SWEEPING_ENCHANT_RESTORES = ATTRIBUTES.register(
+    public static final DeferredHolder<Attribute, Attribute> REWORKED_SWEEPING_ENCHANT_RESTORES = ATTRIBUTES.register(
             "reworked_sweeping_enchant_restores",
             () -> new RangedAttribute("attribute.name.bcattributes.reworked_sweeping_enchant_restores", DEFAULT_REWORKED_SWEEPING_ENCHANT_RESTORES, 0.0D, 1.0D).setSyncable(true)
     );
-    public static final RegistryObject<Attribute> MAX_SWEEP_TARGETS = ATTRIBUTES.register(
+    public static final DeferredHolder<Attribute, Attribute> MAX_SWEEP_TARGETS = ATTRIBUTES.register(
             "max_sweep_targets",
             () -> new RangedAttribute("attribute.name.bcattributes.max_sweep_targets", 0.0D, 0.0D, 1024.0D).setSyncable(true)
     );
-    public static final RegistryObject<Attribute> SWEEP_RANGE_DAMAGE_FALLOFF = ATTRIBUTES.register(
+    public static final DeferredHolder<Attribute, Attribute> SWEEP_RANGE_DAMAGE_FALLOFF = ATTRIBUTES.register(
             "sweep_range_damage_falloff",
             () -> new RangedAttribute("attribute.name.bcattributes.sweep_range_damage_falloff", 0.0D, 0.0D, 1.0D).setSyncable(true)
     );
-    public static final RegistryObject<Attribute> SWEEP_ANGLE = ATTRIBUTES.register(
+    public static final DeferredHolder<Attribute, Attribute> SWEEP_ANGLE = ATTRIBUTES.register(
             "sweep_angle",
             () -> new RangedAttribute("attribute.name.bcattributes.sweep_angle", 0.0D, -360.0D, 360.0D).setSyncable(true)
     );
 
-    public BcAttributes() {
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+    public BcAttributes(IEventBus modEventBus) {
         ATTRIBUTES.register(modEventBus);
-        MinecraftForge.EVENT_BUS.addListener(BcAttributesCommon::onPlayerTick);
-        MinecraftForge.EVENT_BUS.addListener(BcAttributes::onPlayerLoggedIn);
-        MinecraftForge.EVENT_BUS.addListener(BcAttributes::onPlayerClone);
+        NeoForge.EVENT_BUS.addListener(BcAttributesCommon::onPlayerTick);
+        NeoForge.EVENT_BUS.addListener(BcAttributes::onPlayerLoggedIn);
+        NeoForge.EVENT_BUS.addListener(BcAttributes::onPlayerClone);
         modEventBus.addListener(this::onCommonSetup);
         modEventBus.addListener(this::onClientSetup);
         modEventBus.addListener(this::onEntityAttributeModification);
@@ -121,26 +118,26 @@ public final class BcAttributes {
 
     private void onClientSetup(final FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            AttackRangeExtensions.register(BcAttributes::forgeReachModifier);
+            AttackRangeExtensions.register(BcAttributes::entityReachModifier);
             BcAttributesClient.initialize();
         });
     }
 
     private void onEntityAttributeModification(final EntityAttributeModificationEvent event) {
-        event.add(EntityType.PLAYER, UPSWING_MULTIPLIER.get());
-        event.add(EntityType.PLAYER, MOVEMENT_SPEED_WHILE_ATTACKING.get());
-        event.add(EntityType.PLAYER, TARGET_SEARCH_RANGE_MULTIPLIER.get());
-        event.add(EntityType.PLAYER, DUAL_WIELDING_MAIN_HAND_DAMAGE_MULTIPLIER.get());
-        event.add(EntityType.PLAYER, DUAL_WIELDING_OFF_HAND_DAMAGE_MULTIPLIER.get());
-        event.add(EntityType.PLAYER, DUAL_WIELDING_ATTACK_SPEED_MULTIPLIER.get());
-        event.add(EntityType.PLAYER, TWO_HANDED_DAMAGE_MULTIPLIER.get());
-        event.add(EntityType.PLAYER, ATTACK_INTERVAL_CAP.get());
-        event.add(EntityType.PLAYER, REWORKED_SWEEPING_EXTRA_TARGET_COUNT.get());
-        event.add(EntityType.PLAYER, REWORKED_SWEEPING_MAXIMUM_DAMAGE_PENALTY.get());
-        event.add(EntityType.PLAYER, REWORKED_SWEEPING_ENCHANT_RESTORES.get());
-        event.add(EntityType.PLAYER, MAX_SWEEP_TARGETS.get());
-        event.add(EntityType.PLAYER, SWEEP_RANGE_DAMAGE_FALLOFF.get());
-        event.add(EntityType.PLAYER, SWEEP_ANGLE.get());
+        event.add(EntityType.PLAYER, UPSWING_MULTIPLIER);
+        event.add(EntityType.PLAYER, MOVEMENT_SPEED_WHILE_ATTACKING);
+        event.add(EntityType.PLAYER, TARGET_SEARCH_RANGE_MULTIPLIER);
+        event.add(EntityType.PLAYER, DUAL_WIELDING_MAIN_HAND_DAMAGE_MULTIPLIER);
+        event.add(EntityType.PLAYER, DUAL_WIELDING_OFF_HAND_DAMAGE_MULTIPLIER);
+        event.add(EntityType.PLAYER, DUAL_WIELDING_ATTACK_SPEED_MULTIPLIER);
+        event.add(EntityType.PLAYER, TWO_HANDED_DAMAGE_MULTIPLIER);
+        event.add(EntityType.PLAYER, ATTACK_INTERVAL_CAP);
+        event.add(EntityType.PLAYER, REWORKED_SWEEPING_EXTRA_TARGET_COUNT);
+        event.add(EntityType.PLAYER, REWORKED_SWEEPING_MAXIMUM_DAMAGE_PENALTY);
+        event.add(EntityType.PLAYER, REWORKED_SWEEPING_ENCHANT_RESTORES);
+        event.add(EntityType.PLAYER, MAX_SWEEP_TARGETS);
+        event.add(EntityType.PLAYER, SWEEP_RANGE_DAMAGE_FALLOFF);
+        event.add(EntityType.PLAYER, SWEEP_ANGLE);
     }
 
     private static void onPlayerLoggedIn(final PlayerEvent.PlayerLoggedInEvent event) {
@@ -152,7 +149,7 @@ public final class BcAttributes {
     }
 
     private static void applyConfigDefaultBaseValues(final Player player) {
-        ServerConfig config = BetterCombat.config;
+        ServerConfig config = BetterCombatMod.config;
         if (config == null) {
             return;
         }
@@ -166,16 +163,15 @@ public final class BcAttributes {
         setBaseValueFromConfig(player, ATTACK_INTERVAL_CAP, DEFAULT_ATTACK_INTERVAL_CAP, config.attack_interval_cap);
         setBaseValueFromConfig(player, REWORKED_SWEEPING_EXTRA_TARGET_COUNT, DEFAULT_REWORKED_SWEEPING_EXTRA_TARGET_COUNT, config.reworked_sweeping_extra_target_count);
         setBaseValueFromConfig(player, REWORKED_SWEEPING_MAXIMUM_DAMAGE_PENALTY, DEFAULT_REWORKED_SWEEPING_MAXIMUM_DAMAGE_PENALTY, config.reworked_sweeping_maximum_damage_penalty);
-        setBaseValueFromConfig(player, REWORKED_SWEEPING_ENCHANT_RESTORES, DEFAULT_REWORKED_SWEEPING_ENCHANT_RESTORES, config.reworked_sweeping_enchant_restores);
     }
 
     private static void setBaseValueFromConfig(
             final Player player,
-            final RegistryObject<Attribute> attribute,
+            final DeferredHolder<Attribute, Attribute> attribute,
             final double registeredDefault,
             final double configValue
     ) {
-        var attributeInstance = player.getAttribute(attribute.get());
+        var attributeInstance = player.getAttribute(attribute);
         if (attributeInstance == null || attributeInstance.getBaseValue() != registeredDefault || configValue == (float) registeredDefault) {
             return;
         }
@@ -183,22 +179,22 @@ public final class BcAttributes {
         attributeInstance.setBaseValue(configValue);
     }
 
-    private static double forgeReachDelta(final double entityReach) {
-        return entityReach - VANILLA_BASE_ENTITY_REACH;
+    private static double entityReachDelta(final double entityReach) {
+        return entityReach - VANILLA_BASE_ENTITY_INTERACTION_RANGE;
     }
 
-    private static double getAttributeValue(final Player player, final RegistryObject<Attribute> attribute, final double defaultValue) {
-        var attributeInstance = player.getAttribute(attribute.get());
+    private static double getAttributeValue(final Player player, final DeferredHolder<Attribute, Attribute> attribute, final double defaultValue) {
+        var attributeInstance = player.getAttribute(attribute);
         return attributeInstance != null ? attributeInstance.getValue() : defaultValue;
     }
 
-    public static double applyForgeReachToAttackRange(final Player player, final double attackRange) {
-        var entityReachAttribute = player.getAttribute(ForgeMod.ENTITY_REACH.get());
+    public static double applyEntityReachToAttackRange(final Player player, final double attackRange) {
+        var entityReachAttribute = player.getAttribute(Attributes.ENTITY_INTERACTION_RANGE);
         if (entityReachAttribute == null) {
             return attackRange;
         }
 
-        double modifiedAttackRange = attackRange + forgeReachDelta(entityReachAttribute.getValue());
+        double modifiedAttackRange = attackRange + entityReachDelta(entityReachAttribute.getValue());
         return Math.max(0.0D, modifiedAttackRange);
     }
 
@@ -318,7 +314,7 @@ public final class BcAttributes {
             return 1.0D;
         }
 
-        double effectiveAttackRange = applyForgeReachToAttackRange(player, attackRange);
+        double effectiveAttackRange = applyEntityReachToAttackRange(player, attackRange);
         if (effectiveAttackRange <= 0.0D) {
             return 1.0D;
         }
@@ -336,8 +332,8 @@ public final class BcAttributes {
         return attackOrigin.distanceTo(new Vec3(closestX, closestY, closestZ));
     }
 
-    private static AttackRangeExtensions.Modifier forgeReachModifier(final AttackRangeExtensions.Context context) {
-        double modifiedAttackRange = applyForgeReachToAttackRange(context.player(), context.attackRange());
+    private static AttackRangeExtensions.Modifier entityReachModifier(final AttackRangeExtensions.Context context) {
+        double modifiedAttackRange = applyEntityReachToAttackRange(context.player(), context.attackRange());
         double reachDelta = modifiedAttackRange - context.attackRange();
         return new AttackRangeExtensions.Modifier(reachDelta, AttackRangeExtensions.Operation.ADD);
     }
