@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import net.bettercombat.BetterCombat;
 import net.bettercombat.api.client.AttackRangeExtensions;
+import net.bettercombat.config.ServerConfig;
 import net.bettercombat.network.Packets;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -17,6 +19,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -37,6 +40,7 @@ public final class BcAttributes {
     private static final double DEFAULT_DUAL_WIELDING_MAIN_HAND_DAMAGE_MULTIPLIER = 1.0D;
     private static final double DEFAULT_DUAL_WIELDING_OFF_HAND_DAMAGE_MULTIPLIER = 1.0D;
     private static final double DEFAULT_DUAL_WIELDING_ATTACK_SPEED_MULTIPLIER = 1.2D;
+    private static final double DEFAULT_TWO_HANDED_DAMAGE_MULTIPLIER = 1.0D;
     private static final double DEFAULT_ATTACK_INTERVAL_CAP = 2.0D;
     private static final double DEFAULT_REWORKED_SWEEPING_EXTRA_TARGET_COUNT = 4.0D;
     private static final double DEFAULT_REWORKED_SWEEPING_MAXIMUM_DAMAGE_PENALTY = 0.5D;
@@ -66,6 +70,10 @@ public final class BcAttributes {
     public static final RegistryObject<Attribute> DUAL_WIELDING_ATTACK_SPEED_MULTIPLIER = ATTRIBUTES.register(
         "dual_wielding_attack_speed_multiplier",
         () -> new RangedAttribute("attribute.name.bcattributes.dual_wielding_attack_speed_multiplier", DEFAULT_DUAL_WIELDING_ATTACK_SPEED_MULTIPLIER, 0.0D, 1024.0D).setSyncable(true)
+    );
+    public static final RegistryObject<Attribute> TWO_HANDED_DAMAGE_MULTIPLIER = ATTRIBUTES.register(
+        "two_handed_damage_multiplier",
+        () -> new RangedAttribute("attribute.name.bcattributes.two_handed_damage_multiplier", DEFAULT_TWO_HANDED_DAMAGE_MULTIPLIER, 0.0D, 1024.0D).setSyncable(true)
     );
     public static final RegistryObject<Attribute> ATTACK_INTERVAL_CAP = ATTRIBUTES.register(
         "attack_interval_cap",
@@ -100,6 +108,8 @@ public final class BcAttributes {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         ATTRIBUTES.register(modEventBus);
         MinecraftForge.EVENT_BUS.addListener(BcAttributesCommon::onPlayerTick);
+        MinecraftForge.EVENT_BUS.addListener(BcAttributes::onPlayerLoggedIn);
+        MinecraftForge.EVENT_BUS.addListener(BcAttributes::onPlayerClone);
         modEventBus.addListener(this::onCommonSetup);
         modEventBus.addListener(this::onClientSetup);
         modEventBus.addListener(this::onEntityAttributeModification);
@@ -123,6 +133,7 @@ public final class BcAttributes {
         event.add(EntityType.PLAYER, DUAL_WIELDING_MAIN_HAND_DAMAGE_MULTIPLIER.get());
         event.add(EntityType.PLAYER, DUAL_WIELDING_OFF_HAND_DAMAGE_MULTIPLIER.get());
         event.add(EntityType.PLAYER, DUAL_WIELDING_ATTACK_SPEED_MULTIPLIER.get());
+        event.add(EntityType.PLAYER, TWO_HANDED_DAMAGE_MULTIPLIER.get());
         event.add(EntityType.PLAYER, ATTACK_INTERVAL_CAP.get());
         event.add(EntityType.PLAYER, REWORKED_SWEEPING_EXTRA_TARGET_COUNT.get());
         event.add(EntityType.PLAYER, REWORKED_SWEEPING_MAXIMUM_DAMAGE_PENALTY.get());
@@ -130,6 +141,46 @@ public final class BcAttributes {
         event.add(EntityType.PLAYER, MAX_SWEEP_TARGETS.get());
         event.add(EntityType.PLAYER, SWEEP_RANGE_DAMAGE_FALLOFF.get());
         event.add(EntityType.PLAYER, SWEEP_ANGLE.get());
+    }
+
+    private static void onPlayerLoggedIn(final PlayerEvent.PlayerLoggedInEvent event) {
+        applyConfigDefaultBaseValues(event.getEntity());
+    }
+
+    private static void onPlayerClone(final PlayerEvent.Clone event) {
+        applyConfigDefaultBaseValues(event.getEntity());
+    }
+
+    private static void applyConfigDefaultBaseValues(final Player player) {
+        ServerConfig config = BetterCombat.config;
+        if (config == null) {
+            return;
+        }
+
+        setBaseValueFromConfig(player, UPSWING_MULTIPLIER, DEFAULT_UPSWING_MULTIPLIER, config.upswing_multiplier);
+        setBaseValueFromConfig(player, MOVEMENT_SPEED_WHILE_ATTACKING, DEFAULT_MOVEMENT_SPEED_WHILE_ATTACKING, config.movement_speed_while_attacking);
+        setBaseValueFromConfig(player, TARGET_SEARCH_RANGE_MULTIPLIER, DEFAULT_TARGET_SEARCH_RANGE_MULTIPLIER, config.target_search_range_multiplier);
+        setBaseValueFromConfig(player, DUAL_WIELDING_MAIN_HAND_DAMAGE_MULTIPLIER, DEFAULT_DUAL_WIELDING_MAIN_HAND_DAMAGE_MULTIPLIER, config.dual_wielding_main_hand_damage_multiplier);
+        setBaseValueFromConfig(player, DUAL_WIELDING_OFF_HAND_DAMAGE_MULTIPLIER, DEFAULT_DUAL_WIELDING_OFF_HAND_DAMAGE_MULTIPLIER, config.dual_wielding_off_hand_damage_multiplier);
+        setBaseValueFromConfig(player, DUAL_WIELDING_ATTACK_SPEED_MULTIPLIER, DEFAULT_DUAL_WIELDING_ATTACK_SPEED_MULTIPLIER, config.dual_wielding_attack_speed_multiplier);
+        setBaseValueFromConfig(player, ATTACK_INTERVAL_CAP, DEFAULT_ATTACK_INTERVAL_CAP, config.attack_interval_cap);
+        setBaseValueFromConfig(player, REWORKED_SWEEPING_EXTRA_TARGET_COUNT, DEFAULT_REWORKED_SWEEPING_EXTRA_TARGET_COUNT, config.reworked_sweeping_extra_target_count);
+        setBaseValueFromConfig(player, REWORKED_SWEEPING_MAXIMUM_DAMAGE_PENALTY, DEFAULT_REWORKED_SWEEPING_MAXIMUM_DAMAGE_PENALTY, config.reworked_sweeping_maximum_damage_penalty);
+        setBaseValueFromConfig(player, REWORKED_SWEEPING_ENCHANT_RESTORES, DEFAULT_REWORKED_SWEEPING_ENCHANT_RESTORES, config.reworked_sweeping_enchant_restores);
+    }
+
+    private static void setBaseValueFromConfig(
+            final Player player,
+            final RegistryObject<Attribute> attribute,
+            final double registeredDefault,
+            final double configValue
+    ) {
+        var attributeInstance = player.getAttribute(attribute.get());
+        if (attributeInstance == null || attributeInstance.getBaseValue() != registeredDefault || configValue == (float) registeredDefault) {
+            return;
+        }
+
+        attributeInstance.setBaseValue(configValue);
     }
 
     private static double forgeReachDelta(final double entityReach) {
@@ -191,6 +242,10 @@ public final class BcAttributes {
 
     public static float getDualWieldingAttackSpeedMultiplier(final Player player) {
         return (float) Math.max(0.0D, getAttributeValue(player, DUAL_WIELDING_ATTACK_SPEED_MULTIPLIER, DEFAULT_DUAL_WIELDING_ATTACK_SPEED_MULTIPLIER));
+    }
+
+    public static float getTwoHandedDamageMultiplier(final Player player) {
+        return (float) Math.max(0.0D, getAttributeValue(player, TWO_HANDED_DAMAGE_MULTIPLIER, DEFAULT_TWO_HANDED_DAMAGE_MULTIPLIER));
     }
 
     public static List<Entity> limitSweepTargets(

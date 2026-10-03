@@ -15,6 +15,7 @@ import com.jcyyy_.bcattributes.BcAttributes;
 import net.bettercombat.api.AttackHand;
 import net.bettercombat.api.WeaponAttributes;
 import net.bettercombat.config.ServerConfig;
+import net.bettercombat.logic.PlayerAttackHelper;
 import net.bettercombat.network.Packets;
 import net.bettercombat.network.ServerNetwork;
 import net.minecraft.server.level.ServerLevel;
@@ -24,11 +25,33 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 
 @Mixin(value = ServerNetwork.class, remap = false)
 public abstract class ServerNetworkMixin {
     @Unique
     private static final UUID bcattributes$SWEEP_DAMAGE_FALLOFF_MODIFIER_ID = UUID.fromString("e6528b6c-dfae-4bbb-81c6-cf55dcfd81c4");
+
+    @Redirect(
+            method = "lambda$initializeHandlers$5",
+            remap = false,
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/bettercombat/logic/PlayerAttackHelper;getDualWieldingAttackDamageMultiplier(Lnet/minecraft/world/entity/player/Player;Lnet/bettercombat/api/AttackHand;)F",
+                    remap = false
+            )
+    )
+    private static float bcattributes$applyTwoHandedDamageMultiplier(
+            final Player player,
+            final AttackHand hand
+    ) {
+        float damageMultiplier = PlayerAttackHelper.getDualWieldingAttackDamageMultiplier(player, hand);
+        if (PlayerAttackHelper.isTwoHandedWielding(player)) {
+            damageMultiplier *= BcAttributes.getTwoHandedDamageMultiplier(player);
+        }
+
+        return damageMultiplier;
+    }
 
     @Redirect(
             method = "lambda$initializeHandlers$5",

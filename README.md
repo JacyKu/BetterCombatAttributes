@@ -20,6 +20,7 @@ All `bcattributes:*` entries below are registered by this mod on players. `forge
 | `bcattributes:dual_wielding_main_hand_damage_multiplier` | `1.0` | `0.0` to `1024.0` | Damage multiplier for main-hand hits during dual wielding. |
 | `bcattributes:dual_wielding_off_hand_damage_multiplier` | `1.0` | `0.0` to `1024.0` | Damage multiplier for off-hand hits during dual wielding. |
 | `bcattributes:dual_wielding_attack_speed_multiplier` | `1.2` | `0.0` to `1024.0` | Effective dual-wield attack speed multiplier. |
+| `bcattributes:two_handed_damage_multiplier` | `1.0` | `0.0` to `1024.0` | Damage multiplier for attacks made while wielding a two-handed weapon. |
 | `bcattributes:attack_interval_cap` | `2` | `0` to `1024` | Minimum cooldown tick cap used by Better Combat. |
 | `bcattributes:reworked_sweeping_extra_target_count` | `4` | `1` to `1024` | Extra-target count used by Better Combat's reworked sweeping penalty logic. |
 | `bcattributes:reworked_sweeping_maximum_damage_penalty` | `0.5` | `0.0` to `1.0` | Maximum total damage penalty for reworked sweeping extra targets. |
@@ -31,6 +32,8 @@ All `bcattributes:*` entries below are registered by this mod on players. `forge
 
 ## Notes
 
+- Attributes that mirror a Better Combat config option (`upswing_multiplier`, `movement_speed_while_attacking`, `target_search_range_multiplier`, `dual_wielding_*`, `attack_interval_cap`, and `reworked_sweeping_*`) initialize to that config's value when a player joins, so Better Combat config changes are respected by default.
+- The `Default` values in the table above are only fallbacks used if Better Combat's config is unavailable.
 - Item `AttributeModifiers` are additive on top of the defaults above. For example, an item modifier of `0` on `bcattributes:attack_interval_cap` leaves the effective value at the default `2`, not `0`.
 - `bcattributes:sweep_angle` is additive to the weapon's default Better Combat angle.
 - If the effective sweep angle is reduced to `0` or below, extra sweep targets are suppressed.

@@ -1,4 +1,11 @@
 # Changelog
+## 0.3.0
+### Added
+- `bcattributes:two_handed_damage_multiplier` to control damage dealt while wielding a two-handed weapon.
+### Changed
+- Config-backed attributes now initialize their base values from Better Combat's server config on join and respawn, instead of overriding it with a hardcoded copy.
+
+---
 ## 0.2.0
 ### Added
 - `bcattributes:upswing_multiplier` to control Better Combat upswing timing.
